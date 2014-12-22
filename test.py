@@ -32,12 +32,20 @@ config = {
 }
 connect = mysql.connector.connect(**config)
 cursor = connect.cursor()
+
 # サンプルデータの作成
 a = '3'
 b = '13'
+c = 'い'
 d = '2014-12-22 15:46:00'
 e = '103'
 
+cursor.execute('insert into tweets values('+a+',' +b+ ',"' +c+ '","'+d + '",' +e+')')
+cursor.close()
+connect.close()
+
+
+"""
 # twitter.Twitterのインスタンスが返される
 twitter_api = oauth_login()
 
@@ -69,6 +77,7 @@ for tweet in stream:
 
 cursor.close()
 connect.close()
+"""
 
 
 
