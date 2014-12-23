@@ -1,4 +1,3 @@
-# 日本のつぶやきを取得する
 # -- coding: utf-8 --
 
 __author__ = 'Y.F'
@@ -25,10 +24,10 @@ def oauth_login():
 # python から MySQL へデータを格納する
 # コンフィグ の作成
 config = {
-'user': 'root',
-'password': 'sm4547634',
-'host': '127.0.0.1',
-'database': 'twitter',
+    'user': 'root',
+    'password': 'sm4547634',
+    'host': '127.0.0.1',
+    'database': 'twitter',
 }
 
 connect = mysql.connector.connect(**config)
@@ -43,7 +42,7 @@ d = '2014-12-22 15:46:00'
 e = '103'
 """
 
-cursor.execute('insert into tweets (tweet_id, user_id, text, create_at, retweeted_count) values(5, 4, 'u', '2014-12-23 10:04:00', 1)')
+cursor.execute('insert into tweets (tweet_id, user_id, text, create_at, retweeted_count) values(6, 4, "", "2014-12-23 10:04:00", 1)')
 cursor.close()
 connect.close()
 
@@ -55,6 +54,7 @@ twitter_api = oauth_login()
 # self.authパラメータのリファレンス
 twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 
+# 日本のツイートを取得する
 stream = twitter_stream.statuses.filter(locations='129.482881, 31.285110, 147.852021, 44.908014')
 
 for tweet in stream:
