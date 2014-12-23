@@ -30,6 +30,7 @@ config = {
 'host': '127.0.0.1',
 'database': 'twitter',
 }
+
 connect = mysql.connector.connect(**config)
 cursor = connect.cursor()
 
@@ -42,7 +43,7 @@ d = '2014-12-22 15:46:00'
 e = '103'
 """
 
-cursor.execute('insert into tweets values()')
+cursor.execute('insert into tweets (tweet_id, user_id, text, create_at, retweeted_count) values(5, 4, 'u', '2014-12-23 10:04:00', 1)')
 cursor.close()
 connect.close()
 
