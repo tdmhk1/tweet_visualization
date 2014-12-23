@@ -33,14 +33,16 @@ config = {
 connect = mysql.connector.connect(**config)
 cursor = connect.cursor()
 
+"""
 # サンプルデータの作成
 a = '3'
 b = '13'
 c = 'い'
 d = '2014-12-22 15:46:00'
 e = '103'
+"""
 
-cursor.execute('insert into tweets values('+a+',' +b+ ',"' +c+ '","'+d + '",' +e+')')
+cursor.execute('insert into tweets values()')
 cursor.close()
 connect.close()
 
