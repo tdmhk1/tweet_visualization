@@ -8,6 +8,7 @@ import io
 import json
 import datetime
 import mysql.connector
+from flask import Flask, render_template
 
 # 月から数字を取得(出力は文字列)
 def MouthtoInt(s):
@@ -49,9 +50,13 @@ twitter_api = oauth_login()
 # self.authパラメータのリファレンス
 twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 
+# 日本のツイートを取得する
+stream = twitter_stream.statuses.filter(locations='129.834894, 31.138718, 145.874933, 44.973492')
+
+"""
 # 名古屋市栄のツイートを取得する
 stream = twitter_stream.statuses.filter(locations='136.898159, 35.162542, 136.913866, 35.175171')
-
+"""
 for tweet in stream:
 
     # 各カラムのデータを取得
@@ -65,6 +70,27 @@ for tweet in stream:
     cursor.execute('insert into tweets values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'", '+RETWEETED_COUNT+')')
     # DBに反映
     connect.commit()
+    break
+
+# Webページとして表示
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello,World'
+
+
+@app.route('/test')
+def test():
+    try:
+        cursor.execute('select * from tweets')
+        test_data_fetchall = cursor.fetchall()
+        return render_template('test.html', test_data_fetchall=test_data_fetchall)
+    except Exception as e:
+                return e
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 cursor.close()
 connect.close()
