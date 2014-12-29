@@ -58,7 +58,6 @@ stream = twitter_stream.statuses.filter(locations='129.834894, 31.138718, 145.87
 stream = twitter_stream.statuses.filter(locations='136.898159, 35.162542, 136.913866, 35.175171')
 """
 
-count = 0
 for tweet in stream:
 
     # 各カラムのデータを取得
@@ -67,14 +66,19 @@ for tweet in stream:
     TEXT = tweet['text']
     CREATED_AT = str(UTCtoDatetime(tweet['created_at']))
     RETWEETED_COUNT = str(tweet['retweet_count'])
+    LAT = str(tweet['coordinates']['coordinates'][1])
+    LNG = str(tweet['coordinates']['coordinates'][0])
 
-    # SQL文の実行
+    # テーブルtweetsにデータを格納
     cursor.execute('insert into tweets values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'", '+RETWEETED_COUNT+')')
+    # テーブルcoordinatesにデータを格納
+    cursor.execute('insert into coordinates values('+TWEET_ID+','+LAT+','+LNG+')')
+
     # DBに反映
     connect.commit()
-    count += 1
-    if count > 10:
-        break
+
+    break
+
 
 # Webページとして表示
 app = Flask(__name__)
