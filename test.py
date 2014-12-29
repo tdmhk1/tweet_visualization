@@ -57,6 +57,8 @@ stream = twitter_stream.statuses.filter(locations='129.834894, 31.138718, 145.87
 # 名古屋市栄のツイートを取得する
 stream = twitter_stream.statuses.filter(locations='136.898159, 35.162542, 136.913866, 35.175171')
 """
+
+count = 0
 for tweet in stream:
 
     # 各カラムのデータを取得
@@ -70,7 +72,9 @@ for tweet in stream:
     cursor.execute('insert into tweets values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'", '+RETWEETED_COUNT+')')
     # DBに反映
     connect.commit()
-    break
+    count += 1
+    if count > 10:
+        break
 
 # Webページとして表示
 app = Flask(__name__)
@@ -83,7 +87,7 @@ def hello_world():
 @app.route('/test')
 def test():
     try:
-        cursor.execute('select * from tweets')
+        cursor.execute('select * from tweets order by create_at desc')
         test_data_fetchall = cursor.fetchall()
         return render_template('test.html', test_data_fetchall=test_data_fetchall)
     except Exception as e:
