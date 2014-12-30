@@ -60,25 +60,24 @@ stream = twitter_stream.statuses.filter(locations='136.898159, 35.162542, 136.91
 
 for tweet in stream:
 
-    # 各カラムのデータを取得
-    TWEET_ID = str(tweet['id_str'])
-    USER_ID = str(tweet['user']['id_str'])
-    TEXT = tweet['text']
-    CREATED_AT = str(UTCtoDatetime(tweet['created_at']))
-    RETWEETED_COUNT = str(tweet['retweet_count'])
-    LAT = str(tweet['coordinates']['coordinates'][1])
-    LNG = str(tweet['coordinates']['coordinates'][0])
+    try:
+        # 各カラムのデータを取得
+        TWEET_ID = str(tweet['id_str'])
+        USER_ID = str(tweet['user']['id_str'])
+        TEXT = tweet['text']
+        CREATED_AT = str(UTCtoDatetime(tweet['created_at']))
+        LAT = str(tweet['coordinates']['coordinates'][1])
+        LNG = str(tweet['coordinates']['coordinates'][0])
 
-    # テーブルtweetsにデータを格納
-    cursor.execute('insert into tweets values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'", '+RETWEETED_COUNT+')')
-    # テーブルcoordinatesにデータを格納
-    cursor.execute('insert into coordinates values('+TWEET_ID+','+LAT+','+LNG+')')
+        # テーブルtweetsにデータを格納
+        cursor.execute('insert into tweets(tweet_id, user_id, text, created_at) values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'")')
+        # テーブルcoordinatesにデータを格納
+        cursor.execute('insert into coordinates(tweet_id, lat, lng) values('+TWEET_ID+','+LAT+','+LNG+')')
 
-    # DBに反映
-    connect.commit()
-
-    break
-
+        # DBに反映
+        connect.commit()
+    except TypeError:
+        pass
 
 # Webページとして表示
 app = Flask(__name__)
