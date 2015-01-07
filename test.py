@@ -8,7 +8,6 @@ import io
 import json
 import datetime
 import mysql.connector
-from flask import Flask, render_template
 
 # 月から数字を取得(出力は文字列)
 def MouthtoInt(s):
@@ -53,11 +52,6 @@ twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 # 日本のツイートを取得する
 stream = twitter_stream.statuses.filter(locations='129.834894, 31.138718, 145.874933, 44.973492')
 
-"""
-# 名古屋市栄のツイートを取得する
-stream = twitter_stream.statuses.filter(locations='136.898159, 35.162542, 136.913866, 35.175171')
-"""
-
 for tweet in stream:
 
     try:
@@ -68,36 +62,25 @@ for tweet in stream:
         CREATED_AT = str(UTCtoDatetime(tweet['created_at']))
         LAT = str(tweet['coordinates']['coordinates'][1])
         LNG = str(tweet['coordinates']['coordinates'][0])
+        URL = tweet['entities']['urls'][0]['url']
+        DISPLAY_URL = tweet['entities']['urls'][0]['display_url']
 
         # テーブルtweetsにデータを格納
         cursor.execute('insert into tweets(tweet_id, user_id, text, created_at) values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'")')
         # テーブルcoordinatesにデータを格納
-        cursor.execute('insert into coordinates(tweet_id, lat, lng) values('+TWEET_ID+','+LAT+','+LNG+')')
+        cursor.execute('insert into coordinates(tweet_id, lat, lng) values('+TWEET_ID+', '+LAT+', '+LNG+')')
+        # テーブルentitiesにデータを格納
+        cursor.execute('insert into entities(tweet_id, url, display_url) values('+TWEET_ID+', "'+URL+'", "'+DISPLAY_URL+'")')
 
         # DBに反映
         connect.commit()
+
     except TypeError:
         pass
-
-# Webページとして表示
-app = Flask(__name__)
-
-@app.route('/')
-def hello_world():
-    return 'Hello,World'
-
-
-@app.route('/test')
-def test():
-    try:
-        cursor.execute('select * from tweets order by create_at desc')
-        test_data_fetchall = cursor.fetchall()
-        return render_template('test.html', test_data_fetchall=test_data_fetchall)
-    except Exception as e:
-                return e
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    except mysql.connector.errors.ProgrammingError:
+        pass
+    except IndexError:
+        pass
 
 cursor.close()
 connect.close()
