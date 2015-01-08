@@ -62,24 +62,32 @@ for tweet in stream:
         CREATED_AT = str(UTCtoDatetime(tweet['created_at']))
         LAT = str(tweet['coordinates']['coordinates'][1])
         LNG = str(tweet['coordinates']['coordinates'][0])
-        URL = tweet['entities']['urls'][0]['url']
-        DISPLAY_URL = tweet['entities']['urls'][0]['display_url']
+        # URL = tweet['entities']['urls'][0]['url']
+        # DISPLAY_URL = tweet['entities']['urls'][0]['display_url']
 
         # テーブルtweetsにデータを格納
         cursor.execute('insert into tweets(tweet_id, user_id, text, created_at) values('+TWEET_ID+', '+USER_ID+', "'+TEXT+'", "'+CREATED_AT+'")')
         # テーブルcoordinatesにデータを格納
         cursor.execute('insert into coordinates(tweet_id, lat, lng) values('+TWEET_ID+', '+LAT+', '+LNG+')')
+        """
         # テーブルentitiesにデータを格納
         cursor.execute('insert into entities(tweet_id, url, display_url) values('+TWEET_ID+', "'+URL+'", "'+DISPLAY_URL+'")')
+        """
+        if tweet['entities']['urls']==[]:
+            cursor.execute('insert into entities(tweet_id) values('+TWEET_ID+')')
+        else:
+            URL = tweet['entities']['urls'][0]['url']
+            DISPLAY_URL = tweet['entities']['urls'][0]['display_url']
+            cursor.execute('insert into entities(tweet_id, url, display_url) values('+TWEET_ID+', "'+URL+'", "'+DISPLAY_URL+'")')
+
 
         # DBに反映
         connect.commit()
 
+    # 例外処理
     except TypeError:
         pass
     except mysql.connector.errors.ProgrammingError:
-        pass
-    except IndexError:
         pass
 
 cursor.close()
