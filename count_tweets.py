@@ -24,20 +24,21 @@ t_1 = datetime.datetime.now()
 t_0 = t_1 - t_unit
 
 lng_0 = lng_inf
-i = 0
 while True:
     lat_0 = lat_inf
     lng_1 = lng_0 + lng_unit
     while True:
         lat_1 = lat_0 + lat_unit
-        query = "select count(*) from tweets where created_at between '"+str(t_0)+"' and '"+str(t_1)+"' and lat between "+str(lat_0)+" and "+str(lat_1)+"and lng between "+str(lng_0)+" and "+str(lng_1)
-        cursor.execute(query)
+        query1 = "select count(*) from tweets where created_at between '"+str(t_0)+"' and '"+str(t_1)+"' and lat between "+str(lat_0)+" and "+str(lat_1)+"and lng between "+str(lng_0)+" and "+str(lng_1)
+        cursor.execute(query1)
         count = cursor.fetchall()[0][0]
         # point_lat, point_lng は、それぞれのブロックの代表点
         point_lat = (lat_0 + lat_1) / 2
         point_lng = (lng_0 + lng_1) / 2
-        print(str(t_1), str(point_lat), str(point_lng), count, i)
-        i += 1
+        # DBに集計結果を格納
+        query2 = 'insert into count (gettime, pointlat, pointlng, count) values ("'+str(t_1)[:19]+'", '+str(point_lat)+', '+str(point_lng)+', '+str(count)+')'
+        cursor.execute(query2)
+        connect.commit()
         lat_0 = lat_1
         if lat_1 > lat_sup:
             break
