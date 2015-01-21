@@ -50,7 +50,7 @@ twitter_api = oauth_login()
 twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 
 # 東京23区内のツイートを取得する
-stream = twitter_stream.statuses.filter(locations='139.547691, 35.540893, 139.919148, 35.816364')
+stream = twitter_stream.statuses.filter(locations='139.545137, 35.540198, 139.921102, 35.817059')
 
 for tweet in stream:
 
@@ -74,6 +74,8 @@ for tweet in stream:
     except KeyError:
         pass
     except TypeError:
+        pass
+    except mysql.connector.errors.ProgrammingError:
         pass
 
 cursor.close()
