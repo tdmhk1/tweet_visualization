@@ -9,42 +9,49 @@ import mysql.connector
 # 場所を指定して、その領域で過去10分間につぶやかれたツイートを集計する
 # 引数 lat_0: 緯度の南の境界, lat_1: 緯度の北の境界, lng_0: 経度の西の境界, lng_1: 経度の東の境界, t_0:集計時間の10分前, t_1:集計時間
 def countatlocation(lat_0, lat_1, lng_0, lng_1, t_0, t_1):
-    query1 = "select count(*) from tweets where created_at between '"+str(t_0)+"' and '"+str(t_1)+"' and lat between "+str(lat_0)+" and "+str(lat_1)+"and lng between "+str(lng_0)+" and "+str(lng_1)
+    query1 = 'select count(*) from tweets where created_at between "'+str(t_0)+'" and "'+str(t_1)+'" and lat between '+str(lat_0)+' and '+str(lat_1)+'and lng between '+str(lng_0)+' and '+str(lng_1)
     cursor.execute(query1)
     # count は、現在から過去10分間に投稿されたツイート数
     count = cursor.fetchall()[0][0]
-    query2 = "select count from count where gettime = '"+str(t_0)+"' and pointlat = "+str(lat_0)+" and pointlng = "+str(lng_0)
+    query2 = 'select counts from count_data where gettime = "'+str(t_0)+'" and pointlat = '+str(lat_0)+' and pointlng = '+str(lng_0)
     cursor.execute(query2)
     try:
         # countbは、20分前から10分前の間に投稿されたツイート数
-        countb = cursor.fetchall()[0][0]
+        countb = cursor.fetchall()
         # differenceは、現在と10分前のcountの差分
         difference = count - countb
-        linear_expect = 2 * count - countb
+        linear_expect = count + difference
     except IndexError:
         difference = "null"
         linear_expect = "null"
     # DBに集計結果を格納
-    query3 = 'insert into count (gettime, pointlat, pointlng, count, difference, linear_expect) values ("'+str(t_1)[:19]+'", '+str(lat_0)+', '+str(lng_0)+', '+str(count)+', '+str(difference)+', '+str(linear_expect)+')'
+    query3 = 'insert into count_data (gettime, pointlat, pointlng, counts, difference, linear_expect) values ("'+str(t_1)+'", '+str(lat_0)+', '+str(lng_0)+', '+str(count)+', '+str(difference)+', '+str(linear_expect)+')'
     cursor.execute(query3)
     connect.commit()
+
+# datetime型データを秒を0, ミリ秒をnullにして返す
+def floar_seconds(s):
+    return s.replace(second = 0, microsecond = 0)
 
 # t_unit は、時間の刻み幅
 t_unit = datetime.timedelta(minutes=10)
 # 現在の時刻を取得
-t_1 = datetime.datetime.now()
+# t_1 = floar_seconds(datetime.datetime.now())
+t_1 = datetime.datetime(2015, 1, 20, 21, 50, 0)
 t_0 = t_1 - t_unit
 
+
 # 緯度、経度の刻み幅を設定(だいたい1km四方の正方形となるようにとった)
-lat_unit = 0.008983
-lng_unit = 0.011039
+lat_unit = 0.008984
+lng_unit = 0.011040
 # 緯度、経度の境界の設定
-lat_inf = 35.540198
-lng_inf = 139.545137
-lat_sup = 35.817059
-lng_sup = 139.921101
+lat_inf = 35.616040
+lng_inf = 139.681088
+lat_sup = 35.732832
+lng_sup = 139.824608
 
 lng_0 = lng_inf
+
 
 connect = mysql.connector.connect(user='root', password='sm4547634', host='127.0.0.1', database='hotspot', port='3306')
 cursor = connect.cursor()
