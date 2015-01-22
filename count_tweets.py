@@ -23,7 +23,7 @@ def main():
     # t_unit は、時間の刻み幅
     t_unit = datetime.timedelta(minutes=10)
     # 現在の時刻を取得
-    # t_1 =datetime.datetime(2015, 1, 22, 1, 10, 0)
+    # t_1 = datetime.datetime(2015, 1, 22, 10, 20, 0)
     t_1 = floar_seconds(datetime.datetime.now())
     t_0 = t_1 - t_unit
 
@@ -54,12 +54,11 @@ def main():
             query2 = 'select counts, difference from count_data where gettime = "'+str(t_0)+'" and pointlat between '+str(lat[0])+'-'+str(error_range)+' and '+str(lat[0])+'+'+str(error_range)+' and pointlng between '+str(lng[0])+'-'+str(error_range)+' and '+str(lng[0])+'+'+str(error_range)
             cursor.execute(query2)
             try:
-                # countbは、20分前から10分前の間に投稿されたツイート数
-                countb = cursor.description[0][1]
-                countbb = cursor.description[1][1]
+                # countb[0]は、20分前から10分前の間に投稿されたツイート数
+                countb = cursor.fetchall()[0]
                 # differenceは、現在と10分前のcountの差分
-                difference = count - countb
-                second_difference = difference - countbb
+                difference = count - countb[0]
+                second_difference = difference - countb[1]
                 linear_expect = count + difference
                 second_expect = linear_expect + second_difference
             except IndexError:
