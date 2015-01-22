@@ -16,26 +16,33 @@ def d_range(begin, end, step):
     n = begin
     while n < end:
         m = n + step
-        yield [n, m]
+        yield [n.quantize(Decimal('.0000001')), m.quantize(Decimal('.0000001'))]
         n = m
+
+# 負の数を0にして返す
+def minustozero(n):
+    if n > 0:
+        return n
+    else:
+        return 0
 
 def main():
     # t_unit は、時間の刻み幅
     t_unit = datetime.timedelta(minutes=10)
     # 現在の時刻を取得
-    # t_1 = datetime.datetime(2015, 1, 22, 10, 20, 0)
+    t_1 = datetime.datetime(2015, 1, 22, 11, 00, 0)
     t_1 = floar_seconds(datetime.datetime.now())
     t_0 = t_1 - t_unit
 
     # 緯度、経度は、decimal型で、小数第6位に丸めた
     # 緯度、経度の刻み幅を設定(だいたい1km四方の正方形となるようにとった)
-    lat_unit = 0.008984
-    lng_unit = 0.011040
+    lat_unit = Decimal(0.008984)
+    lng_unit = Decimal(0.011040)
     # 緯度、経度の境界の設定
-    lat_inf = 35.616040
-    lng_inf = 139.681088
-    lat_sup = 35.732832
-    lng_sup = 139.824608
+    lat_inf = Decimal(35.616040)
+    lng_inf = Decimal(139.681088)
+    lat_sup = Decimal(35.732832)
+    lng_sup = Decimal(139.824608)
 
     # sqlに格納されている代表点と比較するときの誤差の範囲
     error_range = 0.000010
@@ -43,6 +50,7 @@ def main():
     connect = mysql.connector.connect(user='root', password='sm4547634', host='127.0.0.1', database='hotspot', port='3306')
     cursor = connect.cursor(buffered=True)
 
+    i = 0
     # 各ブロックにわたって集計をする
     for lat in d_range(begin=lat_inf, end=lat_sup, step=lat_unit):
         for lng in d_range(begin=lng_inf, end=lng_sup, step=lng_unit):
@@ -58,19 +66,25 @@ def main():
                 countb = cursor.fetchall()[0]
                 # differenceは、現在と10分前のcountの差分
                 difference = count - countb[0]
+                linear_expect = minustozero(count + difference)
                 second_difference = difference - countb[1]
-                linear_expect = count + difference
-                second_expect = linear_expect + second_difference
+                second_expect = minustozero(linear_expect + second_difference)
             except IndexError:
                 difference = "null"
                 linear_expect = "null"
                 second_difference = "null"
                 second_expect = "null"
+            except TypeError:
+                second_difference = "null"
+                second_expect = "null"
 
+            print(i, str(t_1), str(lat[0]), str(lng[0]), str(count), str(difference), str(linear_expect), str(second_difference), str(second_expect))
+            i += 1
             # DBに集計結果を格納
             query3 = 'insert into count_data (gettime, pointlat, pointlng, counts, difference, second_difference, linear_expect, second_expect) values ("'+str(t_1)+'", '+str(lat[0])+', '+str(lng[0])+', '+str(count)+', '+str(difference)+', '+str(second_difference)+', '+str(linear_expect)+', '+str(second_expect)+')'
             cursor.execute(query3)
             connect.commit()
+
 
     cursor.close()
     connect.close()
