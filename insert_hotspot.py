@@ -3,9 +3,6 @@
 __author__ = 'Y.F'
 
 import twitter
-import sys
-import io
-import json
 import datetime
 import mysql.connector
 
@@ -50,7 +47,7 @@ twitter_api = oauth_login()
 twitter_stream = twitter.TwitterStream(auth=twitter_api.auth)
 
 # 東京23区内のツイートを取得する
-stream = twitter_stream.statuses.filter(locations='139.545137, 35.540198, 139.921102, 35.817059')
+stream = twitter_stream.statuses.filter(locations='139.681088, 35.616040, 139.824608, 35.732832')
 
 for tweet in stream:
 
