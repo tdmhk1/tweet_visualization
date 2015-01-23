@@ -30,7 +30,6 @@ def main():
     # t_unit は、時間の刻み幅
     t_unit = datetime.timedelta(minutes=10)
     # 現在の時刻を取得
-    t_1 = datetime.datetime(2015, 1, 22, 11, 00, 0)
     t_1 = floar_seconds(datetime.datetime.now())
     t_0 = t_1 - t_unit
 
@@ -50,7 +49,6 @@ def main():
     connect = mysql.connector.connect(user='root', password='sm4547634', host='127.0.0.1', database='hotspot', port='3306')
     cursor = connect.cursor(buffered=True)
 
-    i = 0
     # 各ブロックにわたって集計をする
     for lat in d_range(begin=lat_inf, end=lat_sup, step=lat_unit):
         for lng in d_range(begin=lng_inf, end=lng_sup, step=lng_unit):
@@ -68,7 +66,7 @@ def main():
                 difference = count - countb[0]
                 linear_expect = minustozero(count + difference)
                 second_difference = difference - countb[1]
-                second_expect = minustozero(linear_expect + second_difference)
+                second_expect = minustozero(count + difference + second_difference)
             except IndexError:
                 difference = "null"
                 linear_expect = "null"
@@ -78,8 +76,6 @@ def main():
                 second_difference = "null"
                 second_expect = "null"
 
-            print(i, str(t_1), str(lat[0]), str(lng[0]), str(count), str(difference), str(linear_expect), str(second_difference), str(second_expect))
-            i += 1
             # DBに集計結果を格納
             query3 = 'insert into count_data (gettime, pointlat, pointlng, counts, difference, second_difference, linear_expect, second_expect) values ("'+str(t_1)+'", '+str(lat[0])+', '+str(lng[0])+', '+str(count)+', '+str(difference)+', '+str(second_difference)+', '+str(linear_expect)+', '+str(second_expect)+')'
             cursor.execute(query3)
