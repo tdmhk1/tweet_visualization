@@ -13,39 +13,49 @@
     <script>
       // 変数宣言
       var map, pointarray, heatmap;
-      // データの作成
-      var taxiData = [
-        new google.maps.LatLng({{count_data[0][0]}}, {{count_data[0][1]}}),
-        new google.maps.LatLng(37.782745, -122.444586),
-        new google.maps.LatLng(37.782842, -122.443688),
-        new google.maps.LatLng(37.782919, -122.442815),
-        new google.maps.LatLng(37.782992, -122.442112)
-      ];
-
-      // ツイート数が最も多い地域
-      var pointmax = [{{count_data[0][0]}}, {{count_data[0][1]}}]
 
       // 各ブロックの代表点は左下なので、これを修正するために
       // 緯度、経度それぞれに刻み幅の半分を足す
-      var point_unit = [0.008984, 0.011040]
+      var point_unit = [0.008984, 0.011040];
 
-      var pointmax = [pointmax[0] + point_unit[0]/2, pointmax[1] + point_unit[1]/2]
+      // dataは、各ブロックの代表点とツイート数が格納された配列
+      var data = [];
+      // 配列dataに場所データを代入
+      {% for count_column in count_data %}
+        pointlat = {{count_column[0]}} + point_unit[0]/2
+        pointlng = {{count_column[1]}} + point_unit[1]/2
+        count = {{count_column[2]}}
+        data.push( [pointlat, pointlng, count] );
+      {% endfor %}
+
+      // データの作成
+      var count_at_place = [];
+      for (var i = 0; i < data.length; i++){
+        count_at_place.push( {location: new google.maps.LatLng(data[i][0], data[i][1]), weight: data[i][2]} );
+      }
+
+      // ツイート数が最も多い地域
+      var pointmax = [data[0][0], data[0][1]];
+
+      // 集計場所の中心
+      var point_center = [35.674436, 139.752848];
 
       // マップの初期化
       function initialize() {
         var mapOptions = {
-          zoom: 15,
-          center: new google.maps.LatLng(pointmax[0], pointmax[1]),
+          zoom: 12,
+          center: new google.maps.LatLng(point_center[0], point_center[1]),
           mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
         map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
 
-        var pointArray = new google.maps.MVCArray(taxiData);
+        var pointArray = new google.maps.MVCArray(count_at_place);
 
         heatmap = new google.maps.visualization.HeatmapLayer({
-          data: pointArray
+          data: pointArray,
+          radius: 70
         });
 　　　
         // コンストラクタの作成?
@@ -70,7 +80,6 @@
     <div class="migiue">
       データ集計時刻 {{count_data[0][3]}}<br>
       10分間の最大ツイート数 {{count_data[0][2]}}<br>
-      最大ツイートの場所 ({{count_data[0][1]}}, {{count_data[0][0]}})<br>
       <button onclick="toggleHeatmap()">ヒートマップの切り替え</button>
     </div>
 
