@@ -1,8 +1,15 @@
 @charset "UTF-8";
 
+/* 見出し(ツイッターのロゴをイメージした文字) */
+h1 {
+    color: #55ACEE;
+    font: bold xx-large "HGP創英角ﾎﾟｯﾌﾟ体"
+}
+
 html, body, #map-canvas {
-    height: 100%;
-    margin: 0px;
+    height: 95%;
+    width: 95%;
+    margin: 5px;
     padding: 0px
 }
 
@@ -10,9 +17,16 @@ html, body, #map-canvas {
     position: absolute;
     top: 5px;
     left: 50%;
-    margin-left: -180px;
+    margin-left: -150px;
     z-index: 5;
     background-color: #fff;
     padding: 5px;
     border: 1px solid #999;
+}
+
+/* データの集計時間を右上に配置 */
+.datatime {
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
