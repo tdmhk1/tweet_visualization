@@ -7,7 +7,7 @@
     <!-- スタイルシートの適用 -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='mapstyle.css') }}" />
     <!-- googlemapの利用 -->
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=visualization&language=ja"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?&v=3.exp&libraries=visualization&language=ja"></script>
     <script>
       // 変数宣言
       var map, heatmap;
@@ -20,13 +20,48 @@
 
       // マップの初期化
       function initialize() {
-        var mapOptions = {
-          zoom: 12,
-          center: new google.maps.LatLng(35.674436, 139.752848),
-          mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
+        // URLによって、条件分岐
+        var pathname = location.pathname;
+        // URLによって、中心の座標を取得
+        {% set markerlat = markerpoint[0] %}
+        {% set markerlng = markerpoint[1] %}
+        // マーカーを移動させてないとき、地図の設定
+        if ( pathname == '/' || pathname == '/trendspot' ){
+            var mapOptions = {
+              zoom: 12,
+              center: new google.maps.LatLng({{markerlat}}, {{markerlng}}),
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+        }
+        // マーカーを移動させたとき、地図の中心をマーカーで指定した位置に変える
+        else{
+            var mapOptions = {
+              zoom: 15,
+              center: new google.maps.LatLng({{markerlat}}, {{markerlng}}),
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+              };
+        }
 
         map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+      // ドラッグできるマーカーを表示
+      var marker = new google.maps.Marker({
+          position: new google.maps.LatLng({{markerlat}}, {{markerlng}}),
+          title: "getlatlng",
+          draggable: true	// ドラッグ可能にする
+      });
+      marker.setMap(map);
+
+        // マーカーのドロップ（ドラッグ終了）時のイベント
+        google.maps.event.addListener( marker, 'dragend', function(ev){
+            // イベントの引数evの、プロパティ.latLngが緯度経度
+            var markerlat = ev.latLng.lat();
+            var markerlng = ev.latLng.lng();
+            // 小数点以下6桁を切り捨て
+            var markerlat = Math.floor(markerlat * 1000000) / 1000000;
+            var markerlng = Math.floor(markerlng * 1000000) / 1000000;
+            window.open("/marker/"+markerlat+markerlng, "_self")
+        });
 
         var pointArray = new google.maps.MVCArray(tweet_at_place);
 
@@ -59,7 +94,6 @@
     <!-- 直近のデータ集計時刻と最大ツイート数を表示 -->
     <div class="migiue">
       ツイート数集計時刻{{datatime[0]}} ～{{datatime[1]}}<br>
-    　<!-- 10分間の最大ツイート数 {{count_data[0][2]}} -->
     </div>
 
     <!-- 線を引く -->
@@ -76,9 +110,7 @@
 
     <!-- 注目スポットへのリンク -->
     <a href={{linkdata[1]}}>{{linkdata[0]}}</a>
-<!--
-    <button onclick="scrollopen()">注目スポットのツイートを表示</button>
--->
+
     <!-- ツイートの表示 -->
     <div class="scr">
         <!-- 時刻の表示 -->
